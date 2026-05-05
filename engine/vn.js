@@ -4,7 +4,8 @@ const VN = (() => {
     background: "",
     text: [],
     next: null,
-    prev: null
+    prev: null,
+    typeSound: "../../assets/audio/type.mp3" // NEW
   };
 
   let lineIndex = 0;
@@ -12,13 +13,13 @@ const VN = (() => {
   let typing = false;
   let waiting = false;
 
-  let bgEl, containerEl, textEl, navEl;
+  let bgEl, containerEl, textEl;
 
   let audio;
 
   // INIT
   function init(userConfig) {
-    config = userConfig;
+    config = { ...config, ...userConfig }; // merge safely
 
     injectFont();
     createLayout();
@@ -31,7 +32,7 @@ const VN = (() => {
     startLine();
   }
 
-  // FONT FIX (IMPORTANT)
+  // FONT
   function injectFont() {
     const link = document.createElement("link");
     link.href = "https://fonts.googleapis.com/css2?family=VT323&display=swap";
@@ -49,7 +50,7 @@ const VN = (() => {
     document.body.style.overflow = "hidden";
     document.body.style.backgroundColor = "#00084f";
 
-    // BACKGROUND IMAGE
+    // BACKGROUND
     bgEl = document.createElement("div");
     bgEl.style.position = "absolute";
     bgEl.style.inset = "0";
@@ -58,7 +59,7 @@ const VN = (() => {
     bgEl.style.zIndex = "0";
     document.body.appendChild(bgEl);
 
-    // MAIN WRAPPER (IMPORTANT FIX)
+    // WRAPPER
     const wrapper = document.createElement("div");
     wrapper.style.position = "relative";
     wrapper.style.zIndex = "2";
@@ -72,7 +73,6 @@ const VN = (() => {
     containerEl.style.width = "100%";
     containerEl.style.boxSizing = "border-box";
     containerEl.style.padding = "25px 30px";
-
     containerEl.style.background = "rgba(0, 8, 79, 0.75)";
     containerEl.style.borderTop = "2px solid rgba(255,255,255,0.2)";
     containerEl.style.color = "#f2f2f2";
@@ -88,23 +88,30 @@ const VN = (() => {
     document.body.appendChild(wrapper);
   }
 
-  // BACKGROUND FIX
+  // BACKGROUND
   function setBackground() {
     if (config.background && bgEl) {
       bgEl.style.backgroundImage = `url('${config.background}')`;
     }
   }
 
-  // AUDIO
+  // AUDIO (UPDATED)
   function setupAudio() {
-    audio = new Audio("type.mp3");
+    audio = new Audio(config.typeSound);
+    audio.loop = true; //  continuous typing sound
     audio.volume = 0.4;
   }
 
-  function playSound() {
+  function startTypingSound() {
     if (!audio) return;
     audio.currentTime = 0;
     audio.play().catch(() => {});
+  }
+
+  function stopTypingSound() {
+    if (!audio) return;
+    audio.pause();
+    audio.currentTime = 0;
   }
 
   // TEXT SYSTEM
@@ -113,6 +120,8 @@ const VN = (() => {
 
     charIndex = 0;
     typing = true;
+
+    startTypingSound(); //  START SOUND
 
     const span = document.createElement("span");
     textEl.appendChild(span);
@@ -125,21 +134,24 @@ const VN = (() => {
 
     if (charIndex < line.length) {
       span.innerHTML += line[charIndex];
-      playSound();
-
       charIndex++;
       setTimeout(() => typeChar(span), 25);
     } else {
+      stopTypingSound(); //  STOP SOUND
+
       textEl.innerHTML += "<br><br>";
       typing = false;
       waiting = true;
     }
   }
 
-  // CLICK CONTROL (skip + advance)
+  // CLICK CONTROL
   function handleClick() {
 
+    // SKIP typing
     if (typing) {
+      stopTypingSound(); // stop sound immediately
+
       const spans = textEl.querySelectorAll("span");
       const currentSpan = spans[spans.length - 1];
 
@@ -152,6 +164,7 @@ const VN = (() => {
       return;
     }
 
+    // NEXT line
     if (waiting) {
       waiting = false;
       lineIndex++;
