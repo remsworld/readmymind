@@ -2,35 +2,42 @@ const VN = (() => {
 
   let config = {
     background: "",
-    text: []
+    text: [],
+    next: null,
+    prev: null
   };
 
-  let currentLine = 0;
-  let currentChar = 0;
+  let lineIndex = 0;
+  let charIndex = 0;
   let isTyping = false;
   let displayedText = "";
 
-  // Create DOM elements once
-  let bgEl, textEl, hintEl, audioEl;
+  let bgEl, textEl, containerEl, navEl;
+  let audioEl;
 
+  // INIT
   function init(userConfig) {
     config = userConfig;
 
-    setupDOM();
-    setupBackground();
+    createScene();
+    setBackground();
     setupAudio();
+    setupNavigation();
 
-    document.addEventListener("click", next);
+    document.addEventListener("click", handleClick);
+
     typeLine();
   }
 
-  function setupDOM() {
+  // CREATE BASIC STRUCTURE
+  function createScene() {
     document.body.style.margin = "0";
     document.body.style.padding = "0";
     document.body.style.fontFamily = "'VT323', monospace";
     document.body.style.overflow = "hidden";
+    document.body.style.height = "100vh";
 
-    // Background
+    // BACKGROUND
     bgEl = document.createElement("div");
     bgEl.style.position = "absolute";
     bgEl.style.width = "100%";
@@ -40,47 +47,46 @@ const VN = (() => {
     bgEl.style.filter = "brightness(0.7)";
     document.body.appendChild(bgEl);
 
-    // Container
-    const container = document.createElement("div");
-    container.style.position = "relative";
-    container.style.zIndex = "2";
-    container.style.width = "70%";
-    container.style.maxWidth = "800px";
-    container.style.margin = "auto";
-    container.style.top = "50%";
-    container.style.transform = "translateY(-50%)";
-    container.style.background = "rgba(245,245,245,0.95)";
-    container.style.padding = "40px";
-    container.style.boxShadow = "0 0 25px rgba(0,0,0,0.4)";
-    document.body.appendChild(container);
+    // CENTER WRAPPER
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "relative";
+    wrapper.style.zIndex = "2";
+    wrapper.style.width = "70%";
+    wrapper.style.maxWidth = "800px";
+    wrapper.style.margin = "auto";
+    wrapper.style.top = "50%";
+    wrapper.style.transform = "translateY(-50%)";
 
-    // Text
+    // TEXT BOX
+    containerEl = document.createElement("div");
+    containerEl.style.background = "rgba(245,245,245,0.95)";
+    containerEl.style.padding = "40px";
+    containerEl.style.boxShadow = "0 0 25px rgba(0,0,0,0.4)";
+    containerEl.style.boxSizing = "border-box";
+
     textEl = document.createElement("div");
     textEl.style.fontSize = "28px";
     textEl.style.lineHeight = "1.4";
     textEl.style.color = "#111";
     textEl.style.minHeight = "200px";
 
-    // Hint
-    hintEl = document.createElement("div");
-    hintEl.innerText = "click to continue";
-    hintEl.style.marginTop = "20px";
-    hintEl.style.fontSize = "18px";
-    hintEl.style.opacity = "0.6";
+    containerEl.appendChild(textEl);
 
-    container.appendChild(textEl);
-    container.appendChild(hintEl);
+    wrapper.appendChild(containerEl);
+    document.body.appendChild(wrapper);
   }
 
-  function setupBackground() {
+  // BACKGROUND
+  function setBackground() {
     if (bgEl && config.background) {
       bgEl.style.backgroundImage = `url('${config.background}')`;
     }
   }
 
+  // AUDIO
   function setupAudio() {
-    audioEl = new Audio("type.mp3"); //add typing sound here when you find it
-    audioEl.volume = 0.5;
+    audioEl = new Audio("type.mp3");
+    audioEl.volume = 0.4;
   }
 
   function playSound() {
@@ -89,19 +95,20 @@ const VN = (() => {
     audioEl.play().catch(() => {});
   }
 
+  // TYPE SYSTEM
   function typeLine() {
-    if (currentLine >= config.text.length) return;
+    if (lineIndex >= config.text.length) return;
 
-    const line = config.text[currentLine];
+    const line = config.text[lineIndex];
 
-    if (currentChar < line.length) {
-      displayedText += line[currentChar];
+    if (charIndex < line.length) {
+      displayedText += line[charIndex];
       textEl.innerHTML = displayedText;
 
       playSound();
 
-      currentChar++;
-      setTimeout(typeLine, 35); // typing speed
+      charIndex++;
+      setTimeout(typeLine, 35);
     } else {
       displayedText += "<br><br>";
       textEl.innerHTML = displayedText;
@@ -109,19 +116,51 @@ const VN = (() => {
     }
   }
 
-  function next() {
+  function handleClick() {
     if (isTyping) return;
-    if (currentLine >= config.text.length) return;
 
-    isTyping = true;
-    currentChar = 0;
-    currentLine++;
-
-    typeLine();
+    if (lineIndex < config.text.length - 1) {
+      isTyping = true;
+      charIndex = 0;
+      lineIndex++;
+      typeLine();
+    }
   }
 
-  return {
-    init
-  };
+  // NAVIGATION
+  function setupNavigation() {
+    const nav = document.createElement("div");
+    nav.style.display = "flex";
+    nav.style.justifyContent = "space-between";
+    nav.style.marginTop = "25px";
+    nav.style.fontSize = "22px";
+
+    const prev = document.createElement("a");
+    const next = document.createElement("a");
+
+    prev.innerText = "back";
+    next.innerText = "next";
+
+    prev.style.cursor = config.prev ? "pointer" : "default";
+    next.style.cursor = config.next ? "pointer" : "default";
+
+    prev.style.opacity = config.prev ? "1" : "0.3";
+    next.style.opacity = config.next ? "1" : "0.3";
+
+    prev.onclick = () => {
+      if (config.prev) window.location.href = config.prev;
+    };
+
+    next.onclick = () => {
+      if (config.next) window.location.href = config.next;
+    };
+
+    nav.appendChild(prev);
+    nav.appendChild(next);
+
+    containerEl.appendChild(nav);
+  }
+
+  return { init };
 
 })();
