@@ -15,6 +15,7 @@
       font-family: 'VT323', monospace;
 
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
@@ -27,19 +28,15 @@
       max-width: 700px;
       padding: 40px;
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
-
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      margin-bottom: 30px;
     }
 
     .content {
       font-size: 22px;
       line-height: 1.5;
-      margin-bottom: 40px;
     }
 
-   .buttons {
+    .buttons {
       display: flex;
       gap: 20px;
     }
@@ -58,26 +55,25 @@
       background: #ffffff;
       color: #00084f;
     }
-    
   </style>
 </head>
 
 <body>
+
   <div class="container">
-    
     <div class="content">
-      <p>My name is Rem. I write.</p>
+   <p>My name is Rem. I write.</p>
 
       <p>This is one of those times.</p>
 
       <p>I am taking up space.</p>
     </div>
   </div>
-    <div class="buttons">
+
+  <div class="buttons">
     <a href="index.html" class="btn">home?</a>
     <a href="#" class="btn">story</a>
   </div>
-
 
 </body>
 </html>
