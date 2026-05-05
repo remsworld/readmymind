@@ -9,17 +9,22 @@
 
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background-color: #00084f;
-      font-family: 'VT323', monospace;
+  margin: 0;
+  padding: 0;
+  background-color: #00084f;
+  font-family: 'VT323', monospace;
 
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+  height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+    .wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
     .container {
       background-color: #f5f5f5;
@@ -36,10 +41,11 @@
       line-height: 1.5;
     }
 
-    .buttons {
-      display: flex;
-      gap: 20px;
-    }
+   .buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
 
     .btn {
       border: 2px solid #ffffff;
@@ -59,7 +65,7 @@
 </head>
 
 <body>
-
+<div class="wrapper">
   <div class="container">
     <div class="content">
    <p>My name is Rem. I write.</p>
@@ -74,6 +80,6 @@
     <a href="index.html" class="btn">home?</a>
     <a href="#" class="btn">story</a>
   </div>
-
+</div>
 </body>
 </html>
