@@ -39,21 +39,26 @@
       margin-bottom: 40px;
     }
 
-    .nav {
+   .buttons {
       display: flex;
-      justify-content: space-between;
-      font-size: 20px;
+      gap: 20px;
     }
 
-    a {
+    .btn {
+      border: 2px solid #ffffff;
+      padding: 10px 20px;
+      font-size: 22px;
+      color: #ffffff;
+      background: transparent;
       text-decoration: none;
-      color: #111;
-      border-bottom: 1px solid transparent;
+      transition: all 0.2s ease;
     }
 
-    a:hover {
-      border-bottom: 1px solid #111;
+    .btn:hover {
+      background: #ffffff;
+      color: #00084f;
     }
+    
   </style>
 </head>
 
@@ -68,11 +73,11 @@
       <p>I am taking up space.</p>
     </div>
 
-    <div class="nav">
-      <a href="index.html">home?</a>
-      <a href="#">story</a>
-    </div>
-
+    <div class="buttons">
+    <a href="index.html" class="btn">home?</a>
+    <a href="#" class="btn">story</a>
   </div>
+
+
 </body>
 </html>
