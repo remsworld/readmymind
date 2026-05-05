@@ -9,10 +9,13 @@ const VN = (() => {
 
   let lineIndex = 0;
   let charIndex = 0;
-  let isTyping = false;
-  let displayedText = "";
 
-  let bgEl, textEl, containerEl, navEl;
+  let isTyping = false;
+  let isWaitingForNext = false;
+
+  let currentLineEl = "";
+  
+  let bgEl, textEl, containerEl;
   let audioEl;
 
   // INIT
@@ -26,10 +29,12 @@ const VN = (() => {
 
     document.addEventListener("click", handleClick);
 
-    typeLine();
+    startLine();
   }
 
-  // CREATE BASIC STRUCTURE
+  // -------------------------
+  // SCENE SETUP
+  // -------------------------
   function createScene() {
     document.body.style.margin = "0";
     document.body.style.padding = "0";
@@ -44,46 +49,45 @@ const VN = (() => {
     bgEl.style.height = "100%";
     bgEl.style.backgroundSize = "cover";
     bgEl.style.backgroundPosition = "center";
-    bgEl.style.filter = "brightness(0.7)";
+    bgEl.style.filter = "brightness(0.75)";
     document.body.appendChild(bgEl);
 
-    // CENTER WRAPPER
-    const wrapper = document.createElement("div");
-    wrapper.style.position = "relative";
-    wrapper.style.zIndex = "2";
-    wrapper.style.width = "70%";
-    wrapper.style.maxWidth = "800px";
-    wrapper.style.margin = "auto";
-    wrapper.style.top = "50%";
-    wrapper.style.transform = "translateY(-50%)";
-
-    // TEXT BOX
+    // TEXTBOX (dating sim style)
     containerEl = document.createElement("div");
-    containerEl.style.background = "rgba(245,245,245,0.95)";
-    containerEl.style.padding = "40px";
-    containerEl.style.boxShadow = "0 0 25px rgba(0,0,0,0.4)";
+    containerEl.style.position = "absolute";
+    containerEl.style.bottom = "0";
+    containerEl.style.left = "0";
+    containerEl.style.width = "100%";
+
+    containerEl.style.padding = "30px";
     containerEl.style.boxSizing = "border-box";
 
+    containerEl.style.background = "rgba(0, 8, 79, 0.75)";
+    containerEl.style.borderTop = "2px solid rgba(255,255,255,0.2)";
+
+    // TEXT
     textEl = document.createElement("div");
     textEl.style.fontSize = "28px";
-    textEl.style.lineHeight = "1.4";
-    textEl.style.color = "#111";
-    textEl.style.minHeight = "200px";
+    textEl.style.lineHeight = "1.5";
+    textEl.style.color = "#f2f2f2";
+    textEl.style.minHeight = "120px";
 
     containerEl.appendChild(textEl);
-
-    wrapper.appendChild(containerEl);
-    document.body.appendChild(wrapper);
+    document.body.appendChild(containerEl);
   }
 
+  // -------------------------
   // BACKGROUND
+  // -------------------------
   function setBackground() {
     if (bgEl && config.background) {
       bgEl.style.backgroundImage = `url('${config.background}')`;
     }
   }
 
+  // -------------------------
   // AUDIO
+  // -------------------------
   function setupAudio() {
     audioEl = new Audio("type.mp3");
     audioEl.volume = 0.4;
@@ -95,45 +99,76 @@ const VN = (() => {
     audioEl.play().catch(() => {});
   }
 
-  // TYPE SYSTEM
-  function typeLine() {
+  // -------------------------
+  // TEXT SYSTEM
+  // -------------------------
+  function startLine() {
     if (lineIndex >= config.text.length) return;
 
+    currentLineEl = document.createElement("span");
+    textEl.appendChild(currentLineEl);
+
+    charIndex = 0;
+    isTyping = true;
+    typeChar();
+  }
+
+  function typeChar() {
     const line = config.text[lineIndex];
 
-    if (charIndex < line.length) {
-      displayedText += line[charIndex];
-      textEl.innerHTML = displayedText;
+    if (!line) return;
 
+    if (charIndex < line.length) {
+      currentLineEl.innerHTML += line[charIndex];
       playSound();
 
       charIndex++;
-      setTimeout(typeLine, 35);
+      setTimeout(typeChar, 25);
     } else {
-      displayedText += "<br><br>";
-      textEl.innerHTML = displayedText;
       isTyping = false;
+      isWaitingForNext = true;
+
+      // paragraph spacing
+      textEl.innerHTML += "<br><br>";
     }
   }
 
+  // -------------------------
+  // CLICK LOGIC (SKIP + ADVANCE)
+  // -------------------------
   function handleClick() {
-    if (isTyping) return;
 
-    if (lineIndex < config.text.length - 1) {
-      isTyping = true;
-      charIndex = 0;
+    // 1. IF CURRENT LINE IS TYPING → SKIP TO FULL LINE
+    if (isTyping) {
+      const line = config.text[lineIndex];
+      currentLineEl.innerHTML = line;
+
+      isTyping = false;
+      isWaitingForNext = true;
+
+      textEl.innerHTML += "<br><br>";
+      return;
+    }
+
+    // 2. IF DONE TYPING LINE → GO NEXT LINE
+    if (isWaitingForNext) {
+      isWaitingForNext = false;
       lineIndex++;
-      typeLine();
+
+      startLine();
     }
   }
 
+  // -------------------------
   // NAVIGATION
+  // -------------------------
   function setupNavigation() {
     const nav = document.createElement("div");
     nav.style.display = "flex";
     nav.style.justifyContent = "space-between";
-    nav.style.marginTop = "25px";
+    nav.style.marginTop = "20px";
     nav.style.fontSize = "22px";
+    nav.style.color = "#ffffff";
 
     const prev = document.createElement("a");
     const next = document.createElement("a");
