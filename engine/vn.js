@@ -5,13 +5,14 @@ const VN = (() => {
     text: [],
     next: null,
     prev: null,
-    typeSound: "../../assets/audio/type.mp3" // NEW
+    typeSound: "../../assets/typing.mp3" 
   };
 
   let lineIndex = 0;
   let charIndex = 0;
   let typing = false;
   let waiting = false;
+  let lastSoundTime = 0;
 
   let bgEl, containerEl, textEl;
 
@@ -97,15 +98,17 @@ let audioUnlocked = false;
 
   // AUDIO (UPDATED)
 function playTypeSound() {
+  const now = Date.now();
+
+  // prevents spam (VERY IMPORTANT)
+  if (now - lastSoundTime < 30) return;
+
+  lastSoundTime = now;
+
   const sfx = new Audio(config.typeSound);
   sfx.volume = 0.4;
 
-  // optional safety
-  sfx.currentTime = 0;
-
-  sfx.play().catch(() => {
-    // silently ignore autoplay block until user interaction
-  });
+  sfx.play().catch(() => {});
 }
 
   
