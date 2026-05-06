@@ -6,9 +6,7 @@ const VN = (() => {
     next: null,
     prev: null,
     typeSound: "../../assets/typing.mp3"
-    
-    // NEW
-  folderChain: null
+    folderChain: null
   };
 
   let lineIndex = 0;
