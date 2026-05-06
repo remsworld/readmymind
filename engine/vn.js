@@ -5,7 +5,7 @@ const VN = (() => {
     text: [],
     next: null,
     prev: null,
-    typeSound: "../../assets/typing.mp3"
+    typeSound: "../../assets/typing.mp3",
     folderChain: null
   };
 
