@@ -13,6 +13,8 @@ const VN = (() => {
   let typing = false;
   let waiting = false;
 
+  let audioUnlocked = false;
+
   let bgEl, containerEl, textEl;
 
   let audioCache = {};
