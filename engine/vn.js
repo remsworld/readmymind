@@ -321,4 +321,4 @@ function checkFolderTriggers() {
 
   return { init };
 
-})();
+)();
