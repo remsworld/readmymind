@@ -128,21 +128,24 @@ const VN = (() => {
   }
 
   // TEXT SYSTEM
-  function startLine() {
-    if (lineIndex >= config.text.length) return;
+function startLine() {
+  if (lineIndex >= config.text.length) return;
 
-    charIndex = 0;
-    typing = true;
+  charIndex = 0;
+  typing = true;
 
-    const span = document.createElement("span");
-    currentSpan = span;
+  const span = document.createElement("span");
+  currentSpan = span;
 
-    textEl.appendChild(span);
+  textEl.appendChild(span);
 
-    playTypingSound(); // 🔊 start sound once per line
-
-    typeChar(span);
+  //  only start sound AFTER user interaction has happened
+  if (audioUnlocked) {
+    playTypingSound();
   }
+
+  typeChar(span);
+}
 
   function typeChar(span) {
     const lineObj = config.text[lineIndex];
@@ -161,12 +164,19 @@ const VN = (() => {
       waiting = true;
       textEl.innerHTML += "<br><br>";
 
-      stopTypingSound(); // 🔇 stop when done
+      stopTypingSound(); //  stop when done
     }
   }
 
   // CLICK CONTROL
   function handleClick() {
+
+    if (!audioUnlocked) {
+  audioUnlocked = true;
+  playTypingSound(); // should fix start typing issue, prayhaps
+}
+
+     audioUnlocked = true;
 
     if (typing) {
 
@@ -178,7 +188,7 @@ const VN = (() => {
       typing = false;
       waiting = true;
 
-      stopTypingSound(); // 🔇 stop instantly on skip
+      stopTypingSound(); // stop instantly on skip
 
       textEl.innerHTML += "<br><br>";
       return;
