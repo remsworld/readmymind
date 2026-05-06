@@ -163,10 +163,10 @@ const line = typeof lineObj === "object" ? lineObj.line : lineObj;
   }
 }
 
-  // CLICK CONTROL
- function handleClick() {
+// CLICK CONTROL
+function handleClick() {
 
- audioUnlocked = true; // 👈 add this
+  audioUnlocked = true;
 
   if (typing) {
     const spans = textEl.querySelectorAll("span");
@@ -181,28 +181,6 @@ const line = typeof lineObj === "object" ? lineObj.line : lineObj;
     return;
   }
 
-  if (waiting) {
-    waiting = false;
-    lineIndex++;
-    startLine();
-  }
-}
-
-  // SKIP typing
- if (typing) {
-
-  if (!currentSpan) return;
-
-  currentSpan.innerHTML = config.text[lineIndex];
-
-  typing = false;
-  waiting = true;
-  textEl.innerHTML += "<br><br>";
-
-  return;
-}
-
-  // NEXT line
   if (waiting) {
     waiting = false;
     lineIndex++;
