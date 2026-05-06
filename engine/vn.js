@@ -23,8 +23,8 @@ const VN = (() => {
 
   let currentSpan = null;
 
-let folderIndex = 0;
-let folderActive = false;
+  let folderIndex = 0;
+  let folderActive = false;
 
   // INIT
   function init(userConfig) {
@@ -135,69 +135,6 @@ let folderActive = false;
     }
   }
 
-// SPAWN FOLDERS
-
-function spawnFolderRapid(chain) {
-  if (!chain || chain.length === 0) return;
-
-  const spawnNext = () => {
-
-    if (folderIndex >= chain.length) return;
-
-    const folder = document.createElement("div");
-
-    folder.className = "vn-folder";
-
-    folder.style.position = "fixed";
-    folder.style.width = "60px";
-    folder.style.height = "45px";
-    folder.style.background = "#d4b24c";
-    folder.style.borderRadius = "6px";
-    folder.style.boxShadow = "0 5px 10px rgba(0,0,0,0.4)";
-    folder.style.cursor = "pointer";
-
-    folder.style.left = Math.random() * 80 + "vw";
-    folder.style.top = Math.random() * 70 + "vh";
-
-    folder.style.opacity = "0";
-    folder.style.transform = "scale(0.8)";
-    folder.style.transition = "0.2s";
-
-    document.body.appendChild(folder);
-
-    // animate in
-    requestAnimationFrame(() => {
-      folder.style.opacity = "1";
-      folder.style.transform = "scale(1)";
-    });
-
-    folder.onclick = () => {
-      folder.remove();
-      folderIndex++;
-      spawnNext(); // next appears immediately after click
-    };
-
-    //  rapid fire effect (controls spacing)
-    setTimeout(() => {
-      if (folderIndex === 0) {
-        // first one appears immediately
-      }
-    }, 120);
-
-  };
-
-  // start first folder
-  spawnNext();
-}
-function onStoryEnd() {
-  if (!config.folderChain) return;
-
-  folderIndex = 0;
-  folderActive = true;
-
-  spawnFolderRapid(config.folderChain);
-}
-
   // TEXT SYSTEM
   function startLine() {
     if (lineIndex >= config.text.length) return;
@@ -210,7 +147,6 @@ function onStoryEnd() {
 
     textEl.appendChild(span);
 
-    // ONLY start sound if already unlocked
     playTypingSound();
 
     typeChar(span);
@@ -229,23 +165,21 @@ function onStoryEnd() {
 
     } else {
 
-     typing = false;
-waiting = true;
+      typing = false;
+      waiting = true;
 
-textEl.innerHTML += "<br><br>";
+      textEl.innerHTML += "<br><br>";
 
-stopTypingSound();
-
+      stopTypingSound();
     }
   }
 
   // CLICK CONTROL
   function handleClick() {
 
-    // FIRST CLICK UNLOCK
     if (!audioUnlocked) {
       audioUnlocked = true;
-      playTypingSound(); // start immediately on first interaction
+      playTypingSound();
     }
 
     if (typing) {
@@ -264,30 +198,71 @@ stopTypingSound();
       return;
     }
 
-  if (waiting) {
-  waiting = false;
-  lineIndex++;
+    if (waiting) {
+      waiting = false;
+      lineIndex++;
 
-  if (lineIndex >= config.text.length) {
-    onStoryEnd();
-  } else {
-    startLine();
+      if (lineIndex >= config.text.length) {
+        onStoryEnd();
+      } else {
+        startLine();
+      }
     }
   }
 
-//FOLDER STUFF
+  // FOLDER SYSTEM (RAPID CHAIN)
+  function spawnFolderRapid(chain) {
+    if (!chain || chain.length === 0) return;
 
-function checkFolderTriggers() {
+    const spawnNext = () => {
 
-  if (!config.folderChain) return;
+      if (folderIndex >= chain.length) return;
 
-  if (folderActive) return;
+      const folder = document.createElement("div");
 
-  folderActive = true;
-  folderIndex = 0;
+      folder.className = "vn-folder";
 
-  spawnFolder(config.folderChain);
-}
+      folder.style.position = "fixed";
+      folder.style.width = "60px";
+      folder.style.height = "45px";
+      folder.style.background = "#d4b24c";
+      folder.style.borderRadius = "6px";
+      folder.style.boxShadow = "0 5px 10px rgba(0,0,0,0.4)";
+      folder.style.cursor = "pointer";
+
+      folder.style.left = Math.random() * 80 + "vw";
+      folder.style.top = Math.random() * 70 + "vh";
+
+      folder.style.opacity = "0";
+      folder.style.transform = "scale(0.8)";
+      folder.style.transition = "0.2s";
+
+      document.body.appendChild(folder);
+
+      requestAnimationFrame(() => {
+        folder.style.opacity = "1";
+        folder.style.transform = "scale(1)";
+      });
+
+      folder.onclick = () => {
+        folder.remove();
+        folderIndex++;
+        spawnNext();
+      };
+
+    };
+
+    spawnNext();
+  }
+
+  function onStoryEnd() {
+    if (!config.folderChain) return;
+
+    folderIndex = 0;
+    folderActive = true;
+
+    spawnFolderRapid(config.folderChain);
+  }
 
   // NAVIGATION
   function setupNavigation() {
@@ -321,4 +296,4 @@ function checkFolderTriggers() {
 
   return { init };
 
-();
+})();
