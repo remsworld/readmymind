@@ -4,26 +4,36 @@ const VN = (() => {
     background: "",
     text: [],
     next: null,
-    prev: null
+    prev: null,
+    typeSound: "../../assets/typing.mp3" 
   };
 
   let lineIndex = 0;
   let charIndex = 0;
   let typing = false;
   let waiting = false;
+  let lastSoundTime = 0;
 
-  let bgEl, containerEl, textEl, navEl;
+  let bgEl, containerEl, textEl;
 
-  let audio;
+let audioCache = {};
+
+function getAudio(src) {
+  if (!audioCache[src]) {
+    audioCache[src] = new Audio(src);
+    audioCache[src].volume = 0.4;
+  }
+  return audioCache[src];
+}
 
   // INIT
   function init(userConfig) {
-    config = userConfig;
+    config = { ...config, ...userConfig }; // merge safely
 
     injectFont();
     createLayout();
     setBackground();
-    setupAudio();
+    
     setupNavigation();
 
     document.addEventListener("click", handleClick);
@@ -31,7 +41,9 @@ const VN = (() => {
     startLine();
   }
 
-  // FONT FIX (IMPORTANT)
+let currentSpan = null;
+  
+  // FONT
   function injectFont() {
     const link = document.createElement("link");
     link.href = "https://fonts.googleapis.com/css2?family=VT323&display=swap";
@@ -49,7 +61,7 @@ const VN = (() => {
     document.body.style.overflow = "hidden";
     document.body.style.backgroundColor = "#00084f";
 
-    // BACKGROUND IMAGE
+    // BACKGROUND
     bgEl = document.createElement("div");
     bgEl.style.position = "absolute";
     bgEl.style.inset = "0";
@@ -58,7 +70,7 @@ const VN = (() => {
     bgEl.style.zIndex = "0";
     document.body.appendChild(bgEl);
 
-    // MAIN WRAPPER (IMPORTANT FIX)
+    // WRAPPER
     const wrapper = document.createElement("div");
     wrapper.style.position = "relative";
     wrapper.style.zIndex = "2";
@@ -72,7 +84,6 @@ const VN = (() => {
     containerEl.style.width = "100%";
     containerEl.style.boxSizing = "border-box";
     containerEl.style.padding = "25px 30px";
-
     containerEl.style.background = "rgba(0, 8, 79, 0.75)";
     containerEl.style.borderTop = "2px solid rgba(255,255,255,0.2)";
     containerEl.style.color = "#f2f2f2";
@@ -88,76 +99,97 @@ const VN = (() => {
     document.body.appendChild(wrapper);
   }
 
-  // BACKGROUND FIX
+  // BACKGROUND
   function setBackground() {
     if (config.background && bgEl) {
       bgEl.style.backgroundImage = `url('${config.background}')`;
     }
   }
 
-  // AUDIO
-  function setupAudio() {
-    audio = new Audio("type.mp3");
-    audio.volume = 0.4;
-  }
+  // AUDIO (UPDATED)
+function playSound() {
+  const lineObj = config.text[lineIndex];
+  const soundSrc = typeof lineObj === "object"
+    ? lineObj.sound
+    : config.typeSound;
 
-  function playSound() {
-    if (!audio) return;
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
-  }
+  if (!soundSrc) return;
+
+  const audio = getAudio(soundSrc);
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
+
+  
 
   // TEXT SYSTEM
-  function startLine() {
-    if (lineIndex >= config.text.length) return;
+ function startLine() {
+  if (lineIndex >= config.text.length) return;
 
-    charIndex = 0;
-    typing = true;
+  charIndex = 0;
+  typing = true;
 
-    const span = document.createElement("span");
-    textEl.appendChild(span);
 
-    typeChar(span);
+   
+  const span = document.createElement("span");
+  currentSpan = span; // 💡 TRACK IT PROPERLY
+
+  textEl.appendChild(span);
+
+  typeChar(span);
+}
+
+ function typeChar(span) {
+  const lineObj = config.text[lineIndex];
+const line = typeof lineObj === "object" ? lineObj.line : lineObj;
+
+  if (charIndex < line.length) {
+
+    span.innerHTML += line[charIndex];
+
+    // 🔊 play sound per character
+    playTypeSound();
+
+    charIndex++;
+    setTimeout(() => typeChar(span), 25);
+
+  } else {
+
+    typing = false;
+    waiting = true;
+    textEl.innerHTML += "<br><br>";
+  }
+}
+
+  // CLICK CONTROL
+ function handleClick() {
+
+  // unlock audio on first user interaction
+  if (!audioUnlocked) {
+    audioUnlocked = true;
   }
 
-  function typeChar(span) {
-    const line = config.text[lineIndex];
+  // SKIP typing
+ if (typing) {
 
-    if (charIndex < line.length) {
-      span.innerHTML += line[charIndex];
-      playSound();
+  if (!currentSpan) return;
 
-      charIndex++;
-      setTimeout(() => typeChar(span), 25);
-    } else {
-      textEl.innerHTML += "<br><br>";
-      typing = false;
-      waiting = true;
-    }
+  currentSpan.innerHTML = config.text[lineIndex];
+
+  typing = false;
+  waiting = true;
+  textEl.innerHTML += "<br><br>";
+
+  return;
+}
+
+  // NEXT line
+  if (waiting) {
+    waiting = false;
+    lineIndex++;
+    startLine();
   }
-
-  // CLICK CONTROL (skip + advance)
-  function handleClick() {
-
-    if (typing) {
-      const spans = textEl.querySelectorAll("span");
-      const currentSpan = spans[spans.length - 1];
-
-      currentSpan.innerHTML = config.text[lineIndex];
-
-      typing = false;
-      waiting = true;
-      textEl.innerHTML += "<br><br>";
-
-      return;
-    }
-
-    if (waiting) {
-      waiting = false;
-      lineIndex++;
-      startLine();
-    }
-  }
+}
 
   // NAVIGATION
   function setupNavigation() {
