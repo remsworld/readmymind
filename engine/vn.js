@@ -33,6 +33,8 @@ let audioUnlocked = false;
     startLine();
   }
 
+let currentSpan = null;
+  
   // FONT
   function injectFont() {
     const link = document.createElement("link");
@@ -114,19 +116,19 @@ function playTypeSound() {
   
 
   // TEXT SYSTEM
-  function startLine() {
-    if (lineIndex >= config.text.length) return;
+ function startLine() {
+  if (lineIndex >= config.text.length) return;
 
-    charIndex = 0;
-    typing = true;
+  charIndex = 0;
+  typing = true;
 
-    startTypingSound(); //  START SOUND
+  const span = document.createElement("span");
+  currentSpan = span; // 💡 TRACK IT PROPERLY
 
-    const span = document.createElement("span");
-    textEl.appendChild(span);
+  textEl.appendChild(span);
 
-    typeChar(span);
-  }
+  typeChar(span);
+}
 
  function typeChar(span) {
   const line = config.text[lineIndex];
@@ -158,19 +160,18 @@ function playTypeSound() {
   }
 
   // SKIP typing
-  if (typing) {
+ if (typing) {
 
-    const spans = textEl.querySelectorAll("span");
-    const currentSpan = spans[spans.length - 1];
+  if (!currentSpan) return;
 
-    currentSpan.innerHTML = config.text[lineIndex];
+  currentSpan.innerHTML = config.text[lineIndex];
 
-    typing = false;
-    waiting = true;
-    textEl.innerHTML += "<br><br>";
+  typing = false;
+  waiting = true;
+  textEl.innerHTML += "<br><br>";
 
-    return;
-  }
+  return;
+}
 
   // NEXT line
   if (waiting) {
