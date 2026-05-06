@@ -169,7 +169,22 @@ const line = typeof lineObj === "object" ? lineObj.line : lineObj;
  audioUnlocked = true; // 👈 add this
 
   if (typing) {
-    ...
+    const spans = textEl.querySelectorAll("span");
+    const currentSpan = spans[spans.length - 1];
+
+    currentSpan.innerHTML = config.text[lineIndex];
+
+    typing = false;
+    waiting = true;
+    textEl.innerHTML += "<br><br>";
+
+    return;
+  }
+
+  if (waiting) {
+    waiting = false;
+    lineIndex++;
+    startLine();
   }
 }
 
