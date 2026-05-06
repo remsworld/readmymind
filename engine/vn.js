@@ -122,6 +122,8 @@ function playTypeSound() {
   charIndex = 0;
   typing = true;
 
+startTypingSound(); // START SOUND
+   
   const span = document.createElement("span");
   currentSpan = span; // 💡 TRACK IT PROPERLY
 
