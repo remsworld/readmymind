@@ -13,6 +13,7 @@ const VN = (() => {
   let typing = false;
   let waiting = false;
   let lastSoundTime = 0;
+  let audioUnlocked = false;
 
   let bgEl, containerEl, textEl;
 
@@ -108,6 +109,8 @@ let currentSpan = null;
 
   // AUDIO (UPDATED)
 function playSound() {
+  if (!audioUnlocked) return;
+
   const lineObj = config.text[lineIndex];
   const soundSrc = typeof lineObj === "object"
     ? lineObj.sound
@@ -119,7 +122,6 @@ function playSound() {
   audio.currentTime = 0;
   audio.play().catch(() => {});
 }
-
   
 
   // TEXT SYSTEM
@@ -164,10 +166,12 @@ const line = typeof lineObj === "object" ? lineObj.line : lineObj;
   // CLICK CONTROL
  function handleClick() {
 
-  // unlock audio on first user interaction
-  if (!audioUnlocked) {
-    audioUnlocked = true;
+ audioUnlocked = true; // 👈 add this
+
+  if (typing) {
+    ...
   }
+}
 
   // SKIP typing
  if (typing) {
