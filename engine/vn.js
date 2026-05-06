@@ -148,7 +148,7 @@ const line = typeof lineObj === "object" ? lineObj.line : lineObj;
     span.innerHTML += line[charIndex];
 
     // 🔊 play sound per character
-    playTypeSound();
+ playSound();
 
     charIndex++;
     setTimeout(() => typeChar(span), 25);
