@@ -25,7 +25,7 @@ let audioUnlocked = false;
     injectFont();
     createLayout();
     setBackground();
-    setupAudio();
+    
     setupNavigation();
 
     document.addEventListener("click", handleClick);
