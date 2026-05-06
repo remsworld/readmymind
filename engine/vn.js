@@ -15,7 +15,7 @@ const VN = (() => {
 
   let bgEl, containerEl, textEl;
 
-  let audio;
+let audioUnlocked = false;
 
   // INIT
   function init(userConfig) {
@@ -96,23 +96,19 @@ const VN = (() => {
   }
 
   // AUDIO (UPDATED)
-  function setupAudio() {
-    audio = new Audio(config.typeSound);
-    audio.loop = true; //  continuous typing sound
-    audio.volume = 0.4;
-  }
+function playTypeSound() {
+  const sfx = new Audio(config.typeSound);
+  sfx.volume = 0.4;
 
-  function startTypingSound() {
-    if (!audio) return;
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
-  }
+  // optional safety
+  sfx.currentTime = 0;
 
-  function stopTypingSound() {
-    if (!audio) return;
-    audio.pause();
-    audio.currentTime = 0;
-  }
+  sfx.play().catch(() => {
+    // silently ignore autoplay block until user interaction
+  });
+}
+
+  
 
   // TEXT SYSTEM
   function startLine() {
@@ -129,48 +125,57 @@ const VN = (() => {
     typeChar(span);
   }
 
-  function typeChar(span) {
-    const line = config.text[lineIndex];
+ function typeChar(span) {
+  const line = config.text[lineIndex];
 
-    if (charIndex < line.length) {
-      span.innerHTML += line[charIndex];
-      charIndex++;
-      setTimeout(() => typeChar(span), 25);
-    } else {
-      stopTypingSound(); //  STOP SOUND
+  if (charIndex < line.length) {
 
-      textEl.innerHTML += "<br><br>";
-      typing = false;
-      waiting = true;
-    }
+    span.innerHTML += line[charIndex];
+
+    // 🔊 play sound per character
+    playTypeSound();
+
+    charIndex++;
+    setTimeout(() => typeChar(span), 25);
+
+  } else {
+
+    typing = false;
+    waiting = true;
+    textEl.innerHTML += "<br><br>";
   }
+}
 
   // CLICK CONTROL
-  function handleClick() {
+ function handleClick() {
 
-    // SKIP typing
-    if (typing) {
-      stopTypingSound(); // stop sound immediately
-
-      const spans = textEl.querySelectorAll("span");
-      const currentSpan = spans[spans.length - 1];
-
-      currentSpan.innerHTML = config.text[lineIndex];
-
-      typing = false;
-      waiting = true;
-      textEl.innerHTML += "<br><br>";
-
-      return;
-    }
-
-    // NEXT line
-    if (waiting) {
-      waiting = false;
-      lineIndex++;
-      startLine();
-    }
+  // unlock audio on first user interaction
+  if (!audioUnlocked) {
+    audioUnlocked = true;
   }
+
+  // SKIP typing
+  if (typing) {
+
+    const spans = textEl.querySelectorAll("span");
+    const currentSpan = spans[spans.length - 1];
+
+    currentSpan.innerHTML = config.text[lineIndex];
+
+    typing = false;
+    waiting = true;
+    textEl.innerHTML += "<br><br>";
+
+    return;
+  }
+
+  // NEXT line
+  if (waiting) {
+    waiting = false;
+    lineIndex++;
+    startLine();
+  }
+}
 
   // NAVIGATION
   function setupNavigation() {
